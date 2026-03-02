@@ -30,26 +30,29 @@ members = [
 "Эдгар Левин"
 ]
 
-buyers_per_week = 7
 current_index = 0
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Citadel rotation bot active.")
+    await update.message.reply_text("Shop Queue Bot is running.")
 
-async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    buyers = []
-    for i in range(buyers_per_week):
-        buyers.append(members[(current_index + i) % len(members)])
-
-    text = "This week buyers:\n"
-    for b in buyers:
-        text += f"- {b}\n"
-
+async def queue(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = "Current Queue:\n\n"
+    for i, m in enumerate(members):
+        if i == current_index:
+            text += f"{i+1}. {m} ← NEXT\n"
+        else:
+            text += f"{i+1}. {m}\n"
     await update.message.reply_text(text)
+
+async def next_buyer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_index
+    current_index = (current_index + 1) % len(members)
+    await update.message.reply_text(f"Next buyer: {members[current_index]}")
 
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("week", week))
+app.add_handler(CommandHandler("queue", queue))
+app.add_handler(CommandHandler("next", next_buyer))
 
 app.run_polling()
